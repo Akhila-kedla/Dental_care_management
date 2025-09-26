@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dental Care Clinic - Management System</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="container">
+          <div class="header__content">
+            <h1 class="header__title">Shree Dental Clinic</h1>
+            <div class="header__info">
+              <span>Dr. Ananthakrishna K</span>
+              <span class="header__date" id="currentDate"></span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav class="nav">
+        <div class="container">
+          <div class="nav__content">
+            <button
+              class="nav__item nav__item--active"
+              data-section="dashboard"
+            >
+              Dashboard
+            </button>
+            <button class="nav__item" data-section="patients">Patients</button>
+            <button class="nav__item" data-section="treatments">
+              Treatments
+            </button>
+            <button class="nav__item" data-section="earnings">Earnings</button>
+            <button class="nav__item" data-section="appointments">
+              Appointments
+            </button>
+            <button class="nav__item" data-section="reports">Reports</button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main">
+        <div class="container">
+          <!-- Dashboard Section -->
+          <section id="dashboard" class="section section--active">
+            <h2>Dashboard Overview</h2>
+            <div class="dashboard-grid">
+              <div class="stat-card">
+                <h3>Total Patients</h3>
+                <div class="stat-value" id="totalPatients">0</div>
+              </div>
+              <div class="stat-card">
+                <h3>Today's Revenue</h3>
+                <div class="stat-value" id="todayRevenue">Rs.0</div>
+              </div>
+              <div class="stat-card">
+                <h3>This Month</h3>
+                <div class="stat-value" id="monthRevenue">Rs.0</div>
+              </div>
+              <div class="stat-card">
+                <h3>Treatments Today</h3>
+                <div class="stat-value" id="todayTreatments">0</div>
+              </div>
+            </div>
+
+            <div class="charts-grid">
+              <div class="chart-container">
+                <h3>Revenue Trends (Last 7 Days)</h3>
+                <div style="position: relative; height: 400px">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+              <div class="chart-container">
+                <h3>Treatment Distribution</h3>
+                <div style="position: relative; height: 400px">
+                  <canvas id="treatmentChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Patients Section -->
+          <section id="patients" class="section">
+            <div class="section-header">
+              <h2>Patient Management</h2>
+              <button class="btn btn--primary" id="addPatientBtn">
+                Add New Patient
+              </button>
+            </div>
+
+            <div class="search-filter">
+              <input
+                type="text"
+                class="form-control"
+                id="patientSearch"
+                placeholder="Search patients by name or phone..."
+              />
+            </div>
+
+            <div class="patients-list" id="patientsList"></div>
+          </section>
+
+          <!-- Treatments Section -->
+          <section id="treatments" class="section">
+            <div class="section-header">
+              <h2>Treatment Logging</h2>
+              <button class="btn btn--primary" id="addTreatmentBtn">
+                Log New Treatment
+              </button>
+            </div>
+
+            <div class="filter-controls">
+              <select class="form-control" id="treatmentFilter">
+                <option value="">All Treatments</option>
+              </select>
+              <input type="date" class="form-control" id="dateFilter" />
+            </div>
+
+            <div class="treatments-list" id="treatmentsList"></div>
+          </section>
+
+          <!-- Earnings Section -->
+          <section id="earnings" class="section">
+            <h2>Earnings Report</h2>
+
+            <div class="earnings-controls">
+              <select class="form-control" id="earningsFilter">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+              <input type="date" class="form-control" id="earningsDate" />
+            </div>
+
+            <div class="earnings-summary" id="earningsSummary"></div>
+
+            <div class="chart-container">
+              <div style="position: relative; height: 400px">
+                <canvas id="earningsChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <!-- Appointments Section -->
+          <section id="appointments" class="section">
+            <div class="section-header">
+              <h2>Appointments</h2>
+              <button class="btn btn--primary" id="addAppointmentBtn">
+                Schedule Appointment
+              </button>
+            </div>
+
+            <div class="appointments-calendar" id="appointmentsList"></div>
+          </section>
+
+          <!-- Reports Section -->
+          <section id="reports" class="section">
+            <h2>Reports & Export</h2>
+
+            <div class="report-controls">
+              <div class="form-group">
+                <label class="form-label">Report Type</label>
+                <select class="form-control" id="reportType">
+                  <option value="patients">Patient Records</option>
+                  <option value="treatments">Treatment History</option>
+                  <option value="earnings">Earnings Summary</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date Range</label>
+                <div class="date-range">
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="reportStartDate"
+                  />
+                  <input type="date" class="form-control" id="reportEndDate" />
+                </div>
+              </div>
+              <button class="btn btn--primary" id="exportReportBtn">
+                Export PDF
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Modals -->
+      <!-- Patient Modal -->
+      <div class="modal hidden" id="patientModal">
+        <div class="modal__overlay" id="patientModalOverlay"></div>
+        <div class="modal__content">
+          <div class="modal__header">
+            <h3 id="patientModalTitle">Add New Patient</h3>
+            <button class="modal__close" id="closePatientModal">&times;</button>
+          </div>
+          <form class="modal__body" id="patientForm">
+            <div class="form-group">
+              <label class="form-label">Name *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="patientName"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone *</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="patientPhone"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" id="patientEmail" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <textarea
+                class="form-control"
+                id="patientAddress"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <input
+                type="number"
+                class="form-control"
+                id="patientAge"
+                min="0"
+                max="120"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Medical History</label>
+              <textarea
+                class="form-control"
+                id="patientMedicalHistory"
+                rows="3"
+              ></textarea>
+            </div>
+          </form>
+          <div class="modal__footer">
+            <button class="btn btn--secondary" id="cancelPatientModal">
+              Cancel
+            </button>
+            <button class="btn btn--primary" id="savePatient">
+              Save Patient
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Treatment Modal -->
+      <div class="modal hidden" id="treatmentModal">
+        <div class="modal__overlay" id="treatmentModalOverlay"></div>
+        <div class="modal__content">
+          <div class="modal__header">
+            <h3>Log New Treatment</h3>
+            <button class="modal__close" id="closeTreatmentModal">
+              &times;
+            </button>
+          </div>
+          <form class="modal__body" id="treatmentForm">
+            <div class="form-group">
+              <label class="form-label">Patient *</label>
+              <select class="form-control" id="treatmentPatient" required>
+                <option value="">Select Patient</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Treatment Type *</label>
+              <select class="form-control" id="treatmentType" required>
+                <option value="">Select Treatment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea
+                class="form-control"
+                id="treatmentDescription"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fee ($) *</label>
+              <input
+                type="number"
+                class="form-control"
+                id="treatmentFee"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input
+                type="date"
+                class="form-control"
+                id="treatmentDate"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea
+                class="form-control"
+                id="treatmentNotes"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+          <div class="modal__footer">
+            <button class="btn btn--secondary" id="cancelTreatmentModal">
+              Cancel
+            </button>
+            <button class="btn btn--primary" id="saveTreatment">
+              Save Treatment
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Modal -->
+      <div class="modal hidden" id="appointmentModal">
+        <div class="modal__overlay" id="appointmentModalOverlay"></div>
+        <div class="modal__content">
+          <div class="modal__header">
+            <h3>Schedule Appointment</h3>
+            <button class="modal__close" id="closeAppointmentModal">
+              &times;
+            </button>
+          </div>
+          <form class="modal__body" id="appointmentForm">
+            <div class="form-group">
+              <label class="form-label">Patient *</label>
+              <select class="form-control" id="appointmentPatient" required>
+                <option value="">Select Patient</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input
+                type="date"
+                class="form-control"
+                id="appointmentDate"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time *</label>
+              <input
+                type="time"
+                class="form-control"
+                id="appointmentTime"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Treatment Type</label>
+              <select class="form-control" id="appointmentTreatment">
+                <option value="">Select Treatment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea
+                class="form-control"
+                id="appointmentNotes"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+          <div class="modal__footer">
+            <button class="btn btn--secondary" id="cancelAppointmentModal">
+              Cancel
+            </button>
+            <button class="btn btn--primary" id="saveAppointment">
+              Save Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div class="toast hidden" id="successToast">
+        <div class="toast__content">
+          <span class="toast__message" id="toastMessage"></span>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
